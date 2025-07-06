@@ -1,3 +1,22 @@
-# Requirements
+# Backend Web Framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
 
-# Coming soon... 
+# Templating
+jinja2>=3.1.3
+
+# AI + API
+openai>=1.0.0
+requests>=2.31.0
+
+# YouTube transcript extraction
+youtube-transcript-api>=0.6.1
+
+# Data models / validation
+pydantic>=2.4.0
+
+# Testing
+pytest>=7.4.0
+
+# Optional: for parsing JSON and timestamps more easily
+python-dateutil>=2.8.2

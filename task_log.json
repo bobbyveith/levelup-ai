@@ -1,3 +1,32 @@
-{
-  "tasks": []
-} 
+[
+  {
+    "id": 1,
+    "status": "done",
+    "title": "Initialize project scaffolding",
+    "notes": "Created repo structure, base memory files, PRD, and instruction set"
+  },
+  {
+    "id": 2,
+    "status": "in_progress",
+    "title": "Implement AI orchestrator main loop",
+    "notes": "Create ai_committer/main.py to follow instructions.md and drive daily logic"
+  },
+  {
+    "id": 3,
+    "status": "next",
+    "title": "Build flashcard review UI (HTML + JS)",
+    "notes": "Allow user to flip flashcards, self-score, and mark for spaced repetition"
+  },
+  {
+    "id": 4,
+    "status": "next",
+    "title": "Integrate YouTube transcript parser",
+    "notes": "Use youtube-transcript-api and OpenAI to generate flashcards from videos"
+  },
+  {
+    "id": 5,
+    "status": "next",
+    "title": "Add spaced repetition algorithm to backend",
+    "notes": "Implement logic to score answers and schedule next reviews"
+  }
+]

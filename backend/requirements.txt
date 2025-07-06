@@ -1,7 +1,3 @@
-# LevelUp AI Requirements
-# Install backend dependencies
--r backend/requirements.txt
-
 # Backend Web Framework
 fastapi>=0.111.0
 uvicorn[standard]>=0.30.0
@@ -18,9 +14,16 @@ youtube-transcript-api>=0.6.1
 
 # Data models / validation
 pydantic>=2.4.0
+pydantic-settings>=2.0.0
+
+# Email validation
+email-validator>=2.0.0
 
 # Testing
 pytest>=7.4.0
 
 # Optional: for parsing JSON and timestamps more easily
 python-dateutil>=2.8.2
+
+# Additional FastAPI dependencies
+python-multipart>=0.0.5 

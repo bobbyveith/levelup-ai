@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LevelUp AI - Smart Learning Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>🚀 LevelUp AI</h1>
+            <p>Smart Learning Platform with AI-Powered Flashcards and Quizzes</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Flashcards Section -->
+            <div class="card">
+                <h2 class="card-title">📚 Flashcards</h2>
+                <p class="card-description">Study with smart flashcards and track your progress</p>
+                
+                <div class="card-actions">
+                    <button class="btn btn-primary" onclick="loadFlashcards()">Study Flashcards</button>
+                    <button class="btn btn-secondary" onclick="showCreateFlashcardForm()">Create New</button>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="card">
+                <h2 class="card-title">🧠 Quiz</h2>
+                <p class="card-description">Test your knowledge with AI-generated quizzes</p>
+                
+                <div class="quiz-options">
+                    <div class="form-group">
+                        <label class="form-label" for="num-questions">Number of Questions:</label>
+                        <select class="form-input" id="num-questions">
+                            <option value="5">5 Questions</option>
+                            <option value="10">10 Questions</option>
+                            <option value="15">15 Questions</option>
+                            <option value="20">20 Questions</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="difficulty">Difficulty:</label>
+                        <select class="form-input" id="difficulty">
+                            <option value="">All Levels</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card-actions">
+                    <button class="btn btn-primary" id="generate-quiz-btn">Generate Quiz</button>
+                </div>
+            </div>
+
+            <!-- YouTube Section -->
+            <div class="card">
+                <h2 class="card-title">🎥 YouTube Learning</h2>
+                <p class="card-description">Extract flashcards from YouTube videos</p>
+                
+                <div class="form-group">
+                    <label class="form-label" for="youtube-url">YouTube URL:</label>
+                    <input type="url" class="form-input" id="youtube-url" placeholder="https://youtube.com/watch?v=...">
+                </div>
+                
+                <div class="card-actions">
+                    <button class="btn btn-primary" onclick="extractFromYouTube()">Extract Content</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Content Areas -->
+        <div class="content-sections">
+            <!-- Quiz Container -->
+            <div class="quiz-section" id="quiz-section" style="display: none;">
+                <h2>Quiz Time! 🎯</h2>
+                <div class="quiz-container" id="quiz-container">
+                    <p>Click "Generate Quiz" to start!</p>
+                </div>
+            </div>
+
+            <!-- Flashcard Container -->
+            <div class="flashcard-section" id="flashcard-section" style="display: none;">
+                <h2>Study Flashcards 📖</h2>
+                <div class="flashcard-container" id="flashcard-container">
+                    <p>Loading flashcards...</p>
+                </div>
+            </div>
+
+            <!-- Create Flashcard Form -->
+            <div class="create-flashcard-section" id="create-flashcard-section" style="display: none;">
+                <h2>Create New Flashcard ✏️</h2>
+                <form class="flashcard-form" id="flashcard-form">
+                    <div class="form-group">
+                        <label class="form-label" for="flashcard-question">Question:</label>
+                        <textarea class="form-input form-textarea" id="flashcard-question" placeholder="Enter your question here..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="flashcard-answer">Answer:</label>
+                        <textarea class="form-input form-textarea" id="flashcard-answer" placeholder="Enter your answer here..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="flashcard-category">Category:</label>
+                        <input type="text" class="form-input" id="flashcard-category" placeholder="e.g., Math, Science, History">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="flashcard-difficulty">Difficulty:</label>
+                        <select class="form-input" id="flashcard-difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="flashcard-tags">Tags (comma-separated):</label>
+                        <input type="text" class="form-input" id="flashcard-tags" placeholder="tag1, tag2, tag3">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">Create Flashcard</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideCreateFlashcardForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <h2>Your Learning Stats 📊</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-flashcards">0</div>
+                    <div class="stat-label">Total Flashcards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="quizzes-taken">0</div>
+                    <div class="stat-label">Quizzes Taken</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="average-score">0%</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 LevelUp AI. Powered by AI for smarter learning.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='/js/quiz.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/app.js') }}"></script>
+</body>
+</html> 

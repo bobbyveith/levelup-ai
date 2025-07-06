@@ -1,3 +1,0 @@
-// Quiz JavaScript
-
-// Coming soon... 

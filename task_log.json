@@ -19,7 +19,7 @@
   },
   {
     "id": 4,
-    "status": "next",
+    "status": "done",
     "title": "Integrate YouTube transcript parser",
     "notes": "Use youtube-transcript-api and OpenAI to generate flashcards from videos"
   },

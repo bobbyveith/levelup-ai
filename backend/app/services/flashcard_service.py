@@ -1,109 +1,160 @@
-"""Flashcard service for business logic"""
-from typing import List, Optional, Dict, Any
-from backend.app.core.database import JSONDatabase
-from backend.app.models.flashcard import FlashcardModel
+"""Flashcard service for business logic using SQLAlchemy ORM"""
+from typing import List, Optional
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
+
+from backend.app.db.models import Flashcard, User, Category
 from backend.app.schemas.flashcard import FlashcardCreate, FlashcardUpdate
 
 class FlashcardService:
-    """Service class for flashcard operations"""
+    """Service class for flashcard operations using SQLAlchemy"""
     
-    def __init__(self, db: JSONDatabase):
+    def __init__(self, db: Session):
         self.db = db
     
-    def get_all_flashcards(self) -> List[Dict[str, Any]]:
-        """Get all flashcards"""
-        return self.db.get_flashcards()
+    def get_all_flashcards(self, skip: int = 0, limit: int = 100) -> List[Flashcard]:
+        """Get all flashcards with pagination"""
+        return self.db.query(Flashcard).offset(skip).limit(limit).all()
     
-    def get_flashcard_by_id(self, flashcard_id: str) -> Optional[Dict[str, Any]]:
+    def get_flashcard_by_id(self, flashcard_id: int) -> Optional[Flashcard]:
         """Get a specific flashcard by ID"""
-        flashcards = self.db.get_flashcards()
-        for card in flashcards:
-            if card.get("id") == flashcard_id:
-                return card
-        return None
+        return self.db.query(Flashcard).filter(Flashcard.id == flashcard_id).first()
     
-    def create_flashcard(self, flashcard_data: FlashcardCreate) -> Dict[str, Any]:
+    def create_flashcard(self, flashcard_data: FlashcardCreate, owner_id: Optional[int] = None) -> Flashcard:
         """Create a new flashcard"""
-        # Generate ID
-        existing_cards = self.db.get_flashcards()
-        new_id = f"fc_{len(existing_cards) + 1}"
+        # Get or create category if provided
+        category_id = None
+        if flashcard_data.category:
+            category = self.get_or_create_category(flashcard_data.category)
+            category_id = category.id
         
-        # Create flashcard model
-        flashcard = FlashcardModel(
-            id=new_id,
+        # Create flashcard
+        db_flashcard = Flashcard(
             question=flashcard_data.question,
             answer=flashcard_data.answer,
-            category=flashcard_data.category,
-            difficulty=flashcard_data.difficulty,
-            tags=flashcard_data.tags or []
+            difficulty=flashcard_data.difficulty or "medium",
+            tags=flashcard_data.tags or [],
+            owner_id=owner_id,
+            category_id=category_id
         )
         
-        # Add to database
-        current_data = self.db.read_json("flashcards.json")
-        if "flashcards" not in current_data:
-            current_data["flashcards"] = []
+        self.db.add(db_flashcard)
+        self.db.commit()
+        self.db.refresh(db_flashcard)
         
-        current_data["flashcards"].append(flashcard.to_dict())
-        
-        if self.db.write_json("flashcards.json", current_data):
-            return flashcard.to_dict()
-        else:
-            raise Exception("Failed to create flashcard")
+        return db_flashcard
     
-    def update_flashcard(self, flashcard_id: str, update_data: FlashcardUpdate) -> Optional[Dict[str, Any]]:
+    def update_flashcard(self, flashcard_id: int, update_data: FlashcardUpdate) -> Optional[Flashcard]:
         """Update an existing flashcard"""
-        current_data = self.db.read_json("flashcards.json")
-        if "flashcards" not in current_data:
+        db_flashcard = self.get_flashcard_by_id(flashcard_id)
+        if not db_flashcard:
             return None
         
-        for i, card in enumerate(current_data["flashcards"]):
-            if card.get("id") == flashcard_id:
-                # Update fields
-                if update_data.question is not None:
-                    card["question"] = update_data.question
-                if update_data.answer is not None:
-                    card["answer"] = update_data.answer
-                if update_data.category is not None:
-                    card["category"] = update_data.category
-                if update_data.difficulty is not None:
-                    card["difficulty"] = update_data.difficulty
-                if update_data.tags is not None:
-                    card["tags"] = update_data.tags
-                
-                # Update timestamp
-                from datetime import datetime
-                card["updated_at"] = datetime.now().isoformat()
-                
-                if self.db.write_json("flashcards.json", current_data):
-                    return card
-                else:
-                    raise Exception("Failed to update flashcard")
+        # Update fields if provided
+        update_dict = update_data.dict(exclude_unset=True)
         
-        return None
+        # Handle category update
+        if "category" in update_dict:
+            category_name = update_dict.pop("category")
+            if category_name:
+                category = self.get_or_create_category(category_name)
+                db_flashcard.category_id = category.id
+            else:
+                db_flashcard.category_id = None
+        
+        # Update other fields
+        for field, value in update_dict.items():
+            setattr(db_flashcard, field, value)
+        
+        self.db.commit()
+        self.db.refresh(db_flashcard)
+        
+        return db_flashcard
     
-    def delete_flashcard(self, flashcard_id: str) -> bool:
+    def delete_flashcard(self, flashcard_id: int) -> bool:
         """Delete a flashcard"""
-        current_data = self.db.read_json("flashcards.json")
-        if "flashcards" not in current_data:
+        db_flashcard = self.get_flashcard_by_id(flashcard_id)
+        if not db_flashcard:
             return False
         
-        original_length = len(current_data["flashcards"])
-        current_data["flashcards"] = [
-            card for card in current_data["flashcards"] 
-            if card.get("id") != flashcard_id
-        ]
+        self.db.delete(db_flashcard)
+        self.db.commit()
         
-        if len(current_data["flashcards"]) < original_length:
-            return self.db.write_json("flashcards.json", current_data)
-        
-        return False
+        return True
     
-    def get_flashcards_by_category(self, category: str) -> List[Dict[str, Any]]:
-        """Get flashcards by category"""
-        all_cards = self.db.get_flashcards()
-        return [card for card in all_cards if card.get("category") == category]
+    def get_flashcards_by_category(self, category_name: str, skip: int = 0, limit: int = 100) -> List[Flashcard]:
+        """Get flashcards by category name"""
+        return (
+            self.db.query(Flashcard)
+            .join(Category)
+            .filter(Category.name == category_name)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
     
-    def get_flashcards_by_difficulty(self, difficulty: str) -> List[Dict[str, Any]]:
+    def get_flashcards_by_difficulty(self, difficulty: str, skip: int = 0, limit: int = 100) -> List[Flashcard]:
         """Get flashcards by difficulty"""
-        all_cards = self.db.get_flashcards()
-        return [card for card in all_cards if card.get("difficulty") == difficulty] 
+        return (
+            self.db.query(Flashcard)
+            .filter(Flashcard.difficulty == difficulty)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+    
+    def get_flashcards_by_owner(self, owner_id: int, skip: int = 0, limit: int = 100) -> List[Flashcard]:
+        """Get flashcards by owner"""
+        return (
+            self.db.query(Flashcard)
+            .filter(Flashcard.owner_id == owner_id)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+    
+    def search_flashcards(self, query: str, skip: int = 0, limit: int = 100) -> List[Flashcard]:
+        """Search flashcards by question or answer content"""
+        search_filter = or_(
+            Flashcard.question.contains(query),
+            Flashcard.answer.contains(query)
+        )
+        
+        return (
+            self.db.query(Flashcard)
+            .filter(search_filter)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+    
+    def get_or_create_category(self, category_name: str) -> Category:
+        """Get existing category or create a new one"""
+        category = self.db.query(Category).filter(Category.name == category_name).first()
+        if not category:
+            category = Category(name=category_name)
+            self.db.add(category)
+            self.db.commit()
+            self.db.refresh(category)
+        
+        return category
+    
+    def get_categories(self) -> List[Category]:
+        """Get all categories"""
+        return self.db.query(Category).all()
+    
+    def get_flashcard_count(self) -> int:
+        """Get total number of flashcards"""
+        return self.db.query(Flashcard).count()
+    
+    def get_flashcard_count_by_difficulty(self) -> dict:
+        """Get flashcard count grouped by difficulty"""
+        from sqlalchemy import func
+        
+        results = (
+            self.db.query(Flashcard.difficulty, func.count(Flashcard.id))
+            .group_by(Flashcard.difficulty)
+            .all()
+        )
+        
+        return {difficulty: count for difficulty, count in results} 

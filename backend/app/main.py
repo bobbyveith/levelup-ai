@@ -1,89 +1,91 @@
-"""LevelUp AI - Main FastAPI Application"""
-
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+"""Main FastAPI application with SQLAlchemy database support"""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+from fastapi.responses import HTMLResponse
 
 from backend.app.core.config import settings
-from backend.app.api.v1.api import api_router
+from backend.app.core.database import init_db
+from backend.app.api.v1 import flashcards, quiz, youtube
+
+# Initialize database tables
+init_db()
 
 # Create FastAPI app
 app = FastAPI(
     title=settings.app_name,
-    version=settings.app_version,
-    debug=settings.debug,
-    description="Smart Learning Platform with AI-Powered Flashcards and Quizzes"
+    version="1.0.0",
+    description="LevelUp AI - Smart Learning Platform with SQLAlchemy",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],  # In production, specify actual origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Mount static files
-app.mount("/static", StaticFiles(directory=settings.static_dir), name="static")
+app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
 
-# Templates
-templates = Jinja2Templates(directory=settings.templates_dir)
+# Jinja2 templates
+templates = Jinja2Templates(directory="../frontend/templates")
 
-# Include API router
-app.include_router(api_router, prefix=settings.api_v1_prefix)
+# Include API routers
+app.include_router(flashcards.router, prefix="/api/v1/flashcards", tags=["flashcards"])
+app.include_router(quiz.router, prefix="/api/v1/quiz", tags=["quiz"])
+app.include_router(youtube.router, prefix="/api/v1/youtube", tags=["youtube"])
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    """Serve the main page"""
+async def home(request: Request):
+    """Home page"""
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
-        "status": "healthy", 
-        "app": settings.app_name,
-        "version": settings.app_version,
-        "debug": settings.debug
+        "status": "healthy",
+        "message": "LevelUp AI is running with SQLAlchemy database",
+        "version": "1.0.0"
     }
 
-@app.get("/flashcards", response_class=HTMLResponse)
-async def flashcards_page(request: Request):
-    """Serve the flashcards page"""
-    return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/api/v1/health")
+async def api_health():
+    """API health check"""
+    return {
+        "status": "healthy",
+        "database": "SQLAlchemy + SQLite",
+        "features": [
+            "Flashcard Management",
+            "Quiz Generation",
+            "YouTube Integration",
+            "User Management",
+            "Progress Tracking"
+        ]
+    }
 
-@app.get("/quiz", response_class=HTMLResponse)
-async def quiz_page(request: Request):
-    """Serve the quiz page"""
-    return templates.TemplateResponse("index.html", {"request": request})
-
-@app.get("/youtube", response_class=HTMLResponse)
-async def youtube_page(request: Request):
-    """Serve the YouTube extraction page"""
-    return templates.TemplateResponse("index.html", {"request": request})
-
-# Startup event
-@app.on_event("startup")
-async def startup_event():
-    """Application startup"""
-    print(f"🚀 {settings.app_name} v{settings.app_version} starting up...")
-    print(f"📊 Debug mode: {settings.debug}")
-    print(f"🔗 API docs available at: http://{settings.host}:{settings.port}/docs")
-
-# Shutdown event
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Application shutdown"""
-    print(f"🛑 {settings.app_name} shutting down...")
+@app.get("/api/v1/")
+async def api_info():
+    """API information"""
+    return {
+        "message": "LevelUp AI API v1.0",
+        "database": "SQLAlchemy + SQLite",
+        "endpoints": {
+            "flashcards": "/api/v1/flashcards",
+            "quiz": "/api/v1/quiz",
+            "youtube": "/api/v1/youtube"
+        },
+        "docs": "/api/docs"
+    }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        app, 
-        host=settings.host, 
-        port=settings.port,
-        reload=settings.debug
-    ) 
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True) 

@@ -1,52 +1,64 @@
-"""Database configuration and connections"""
-import json
+"""Database configuration and SQLAlchemy setup"""
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
+from typing import Generator
 import os
-from typing import Dict, Any, List
-from backend.app.core.config import settings
 
-class JSONDatabase:
-    """Simple JSON file database for the LevelUp AI app"""
-    
-    def __init__(self):
-        self.data_dir = settings.data_dir
-        
-    def read_json(self, filename: str) -> Dict[str, Any]:
-        """Read data from JSON file"""
-        file_path = os.path.join(self.data_dir, filename)
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except FileNotFoundError:
-            return {}
-        except json.JSONDecodeError:
-            return {}
-    
-    def write_json(self, filename: str, data: Dict[str, Any]) -> bool:
-        """Write data to JSON file"""
-        file_path = os.path.join(self.data_dir, filename)
-        try:
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-            return True
-        except Exception as e:
-            print(f"Error writing to {filename}: {e}")
-            return False
-    
-    def get_flashcards(self) -> List[Dict[str, Any]]:
-        """Get all flashcards"""
-        data = self.read_json("flashcards.json")
-        return data.get("flashcards", [])
-    
-    def get_youtube_cards(self) -> List[Dict[str, Any]]:
-        """Get all YouTube cards"""
-        data = self.read_json("youtube_cards.json")
-        return data.get("youtube_cards", [])
-    
-    def get_user_profile(self) -> Dict[str, Any]:
-        """Get user profile"""
-        data = self.read_json("user_profile.json")
-        return data.get("user_profile", {})
+from app.core.config import settings
 
-# Global database instance
-db = JSONDatabase() 
+# Ensure data directory exists
+os.makedirs(settings.data_dir, exist_ok=True)
+
+# Create SQLite database URL
+SQLALCHEMY_DATABASE_URL = f"sqlite:///./{settings.data_dir}/levelup.db"
+
+# Create engine with SQLite-specific settings
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    poolclass=StaticPool,
+    connect_args={
+        "check_same_thread": False,  # Allow SQLite to be used with FastAPI
+    },
+    echo=settings.debug,  # Log SQL queries in debug mode
+)
+
+# Create SessionLocal class
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create Base class for models
+Base = declarative_base()
+
+def get_db() -> Generator[Session, None, None]:
+    """
+    Dependency to get database session.
+    
+    This will be used as a FastAPI dependency to inject database sessions
+    into route handlers and services.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def create_tables():
+    """Create all database tables"""
+    # Import models to register them with Base
+    from app.db import models
+    Base.metadata.create_all(bind=engine)
+
+def drop_tables():
+    """Drop all database tables (for testing/reset)"""
+    Base.metadata.drop_all(bind=engine)
+
+# Database utilities
+def init_db():
+    """Initialize database with tables"""
+    create_tables()
+
+def reset_db():
+    """Reset database (drop and recreate all tables)"""
+    drop_tables()
+    create_tables() 

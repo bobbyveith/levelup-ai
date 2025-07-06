@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Import our models and database configuration
 from app.core.database import Base, SQLALCHEMY_DATABASE_URL
-from app.db import models  # Import models to register them
+from app import models  # Import models to register them
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

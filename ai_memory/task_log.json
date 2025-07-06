@@ -25,7 +25,7 @@
   },
   {
     "id": 5,
-    "status": "next",
+    "status": "done",
     "title": "Add spaced repetition algorithm to backend",
     "notes": "Implement logic to score answers and schedule next reviews"
   }

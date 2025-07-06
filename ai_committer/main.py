@@ -2,7 +2,7 @@
 """
 AI Orchestrator - Main Brain of LevelUp AI
 
-This script follows the daily loop defined in instructions.md:
+This script follows the daily loop defined in ai_memory/instructions.md:
 1. Load project memory
 2. Decide what to work on
 3. Execute the work
@@ -27,10 +27,10 @@ class AIOrchestrator:
     def __init__(self):
         self.project_root = Path(__file__).parent.parent
         self.memory_files = {
-            'brain': self.project_root / 'brain.md',
-            'task_log': self.project_root / 'task_log.json',
-            'topics': self.project_root / 'topics.md',
-            'progress': self.project_root / 'progress.md',
+            'brain': self.project_root / 'ai_memory' / 'brain.md',
+            'task_log': self.project_root / 'ai_memory' / 'task_log.json',
+            'topics': self.project_root / 'ai_memory' / 'topics.md',
+            'progress': self.project_root / 'ai_memory' / 'progress.md',
             'user_profile': self.project_root / 'data' / 'user_profile.json'
         }
         

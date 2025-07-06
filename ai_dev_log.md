@@ -57,3 +57,77 @@ By following these steps and integrating the YouTube transcript parser into your
 - Committed progress
 
 ---
+
+# AI Development Log Entry - 2025-07-05T21:33:11.148776
+
+## Task: Add spaced repetition algorithm to backend
+**Status**: next
+**Notes**: Implement logic to score answers and schedule next reviews
+
+## AI Context:
+To add a spaced repetition algorithm to the backend of the LevelUp AI app, you can follow these specific code changes:
+
+1. **Add a new model in SQLAlchemy for tracking flashcard reviews**:
+    ```python
+    from sqlalchemy import Column, Integer, DateTime
+    from sqlalchemy.ext.declarative import declarative_base
+
+    Base = declarative_base()
+
+    class FlashcardReview(Base):
+        __tablename__ = 'flashcard_review'
+        id = Column(Integer, primary_key=True)
+        flashcard_id = Column(Integer, ForeignKey('flashcard.id'))
+        user_id = Column(Integer, ForeignKey('user.id'))
+        review_date = Column(DateTime)
+        next_review_date = Column(DateTime)
+        score = Column(Integer)
+    ```
+
+2. **Update your existing Flashcard model** to include an attribute for the difficulty level:
+    ```python
+    class Flashcard(Base):
+        __tablename__ = 'flashcard'
+        id = Column(Integer, primary_key=True)
+        question = Column(String)
+        answer = Column(String)
+        difficulty = Column(Integer)  # Add difficulty level for spaced repetition
+    ```
+
+3. **Implement a function to schedule next review date based on the user's score**:
+    ```python
+    from datetime import timedelta
+
+    def schedule_next_review(score, last_review_date):
+        if score >= 3:
+            return last_review_date + timedelta(days=1)
+        elif score == 2:
+            return last_review_date + timedelta(days=3)
+        else:
+            return last_review_date + timedelta(days=7)
+    ```
+
+4. **Update your API endpoint for submitting flashcard reviews**:
+    ```python
+    @app.post('/flashcards/{flashcard_id}/review')
+    def submit_flashcard_review(flashcard_id: int, score: int):
+        # Logic to fetch flashcard, calculate next review date, and update database
+        flashcard = session.query(Flashcard).filter_by(id=flashcard_id).first()
+        next_review_date = schedule_next_review(score, flashcard.last_review_date)
+        flashcard_review = FlashcardReview(flashcard_id=flashcard_id, user_id=current_user.id, review_date=datetime.now(), next_review_date=next_review_date, score=score)
+        session.add(flashcard_review)
+        session.commit()
+        return {'message': 'Review submitted successfully'}
+    ```
+
+5. **Update your frontend to display flashcards based on the next review date**:
+    - Modify frontend logic to fetch flashcards that are due for review based on the next review date stored in the database.
+
+By implementing these code changes, you will be able to integrate a spaced repetition algorithm into your LevelUp AI app's backend for efficient flashcard review scheduling.
+
+## Actions Taken:
+- Executed daily development loop
+- Updated project memory
+- Committed progress
+
+---

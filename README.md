@@ -6,24 +6,44 @@ Smart Learning Platform with AI-Powered Flashcards and Quizzes
 
 ```
 LevelUp/
-├── backend/                 # FastAPI Backend
+├── ai_memory/              # AI Brain & Memory System
+│   ├── brain.md           # Long-term project memory
+│   ├── instructions.md    # Daily AI loop instructions
+│   ├── task_log.json      # Task management & progress
+│   ├── progress.md        # Daily changelog
+│   ├── topics.md          # Learning topics covered
+│   └── prd.md             # Product requirements
+├── backend/               # FastAPI Backend
 │   ├── app/
-│   │   ├── core/           # Configuration & database
-│   │   ├── api/            # API routes & endpoints
-│   │   ├── models/         # Data models
-│   │   ├── schemas/        # Pydantic schemas
-│   │   ├── services/       # Business logic
-│   │   └── main.py         # FastAPI application
-│   └── requirements.txt    # Backend dependencies
-├── frontend/               # Frontend assets
-│   ├── static/            # CSS, JS, images
-│   └── templates/         # HTML templates
-├── ai_committer/          # AI automation scripts
-├── data/                  # JSON data storage
-├── tests/                 # Test files
-├── run.py                # Application runner
-└── requirements.txt      # Root requirements
+│   │   ├── core/         # Configuration & database
+│   │   ├── api/          # API routes & endpoints
+│   │   ├── models/       # Data models
+│   │   ├── schemas/      # Pydantic schemas
+│   │   ├── services/     # Business logic
+│   │   └── main.py       # FastAPI application
+│   └── requirements.txt  # Backend dependencies
+├── frontend/             # Frontend assets
+│   ├── static/          # CSS, JS, images
+│   └── templates/       # HTML templates
+├── ai_committer/        # AI automation scripts
+├── data/                # JSON data storage
+├── tests/               # Test files
+├── run.py              # Application runner
+└── requirements.txt    # Root requirements
 ```
+
+## 🧠 AI Memory System
+
+This project includes a unique **AI Memory System** (`ai_memory/`) that powers the self-building capabilities:
+
+- **`brain.md`** - Long-term architectural understanding
+- **`instructions.md`** - Daily development loop instructions
+- **`task_log.json`** - Task tracking and management
+- **`progress.md`** - Daily changelog of AI progress
+- **`topics.md`** - Learning content already covered
+- **`prd.md`** - Product requirements and vision
+
+The AI orchestrator reads these files daily to understand project state, decide what to work on next, and update its memory with progress.
 
 ## 🚀 Quick Start
 
@@ -80,6 +100,7 @@ The frontend is a modern single-page application with:
 - Responsive UI
 - API documentation
 - Health monitoring
+- **AI Self-Building System**
 
 ### 🚧 In Progress
 - YouTube content extraction
@@ -105,7 +126,7 @@ DEBUG=true
 # API Configuration
 API_V1_PREFIX="/api/v1"
 
-# OpenAI (optional)
+# OpenAI (required for AI features)
 OPENAI_API_KEY="your-api-key-here"
 
 # Server Configuration
@@ -120,6 +141,20 @@ Currently using JSON files for data storage:
 - `data/youtube_cards.json` - YouTube video data
 - `data/user_profile.json` - User preferences
 
+## 🤖 AI Orchestrator
+
+The AI orchestrator (`ai_committer/main.py`) runs daily to:
+1. Load project memory from `ai_memory/`
+2. Decide what to work on next
+3. Execute development tasks
+4. Update memory files with progress
+5. Commit and push changes
+
+To set up automated development:
+1. Add `OPENAI_API_KEY` to GitHub Secrets
+2. The workflow runs daily at 3PM UTC
+3. Manual triggers available via GitHub Actions
+
 ## 🧪 Testing
 
 ```bash
@@ -131,6 +166,7 @@ pytest
 
 - API Documentation: Available at `/docs` when running
 - Interactive API: Available at `/redoc` when running
+- AI Memory System: See `ai_memory/README.md`
 
 ## 🤝 Contributing
 

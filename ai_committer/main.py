@@ -37,8 +37,8 @@ class AIOrchestrator:
         # Initialize OpenAI
         self.openai_client = None
         if openai_key := os.getenv('OPENAI_API_KEY'):
-            openai.api_key = openai_key
-            self.openai_client = openai
+            from openai import OpenAI
+            self.openai_client = OpenAI(api_key=openai_key)
         
         self.current_task = None
         self.commits_made = []
@@ -153,7 +153,7 @@ class AIOrchestrator:
             }}
             """
             
-            response = self.openai_client.ChatCompletion.create(
+            response = self.openai_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are an AI developer working on a spaced repetition learning app. Suggest the next logical development task."},
@@ -213,7 +213,7 @@ class AIOrchestrator:
             What specific code changes should be made? Be concrete and actionable.
             """
             
-            response = self.openai_client.ChatCompletion.create(
+            response = self.openai_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are an AI developer. Suggest specific, implementable code changes."},

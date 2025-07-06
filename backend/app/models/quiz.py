@@ -1,66 +1,5 @@
-"""SQLAlchemy models for LevelUp AI"""
-from sqlalchemy import Column, Integer, String, Text, DateTime, Float, Boolean, ForeignKey, JSON
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from app.core.database import Base
-
-class User(Base):
-    """User model for authentication and profile management"""
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(255), unique=True, index=True, nullable=True)
-    preferences = Column(JSON, default=dict)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-    # Relationships
-    flashcards = relationship("Flashcard", back_populates="owner", cascade="all, delete-orphan")
-    quiz_attempts = relationship("QuizAttempt", back_populates="user", cascade="all, delete-orphan")
-
-    def __repr__(self):
-        return f"<User(id={self.id}, name='{self.name}')>"
-
-class Category(Base):
-    """Category model for organizing flashcards"""
-    __tablename__ = "categories"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), unique=True, nullable=False, index=True)
-    description = Column(Text, nullable=True)
-    color = Column(String(7), default="#3b82f6")  # Hex color code
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relationships
-    flashcards = relationship("Flashcard", back_populates="category")
-
-    def __repr__(self):
-        return f"<Category(id={self.id}, name='{self.name}')>"
-
-class Flashcard(Base):
-    """Flashcard model for storing questions and answers"""
-    __tablename__ = "flashcards"
-
-    id = Column(Integer, primary_key=True, index=True)
-    question = Column(Text, nullable=False)
-    answer = Column(Text, nullable=False)
-    difficulty = Column(String(20), default="medium")  # easy, medium, hard
-    tags = Column(JSON, default=list)  # List of string tags
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
-    # Foreign keys
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
-
-    # Relationships
-    owner = relationship("User", back_populates="flashcards")
-    category = relationship("Category", back_populates="flashcards")
-    quiz_questions = relationship("QuizQuestion", back_populates="flashcard")
-
-    def __repr__(self):
-        return f"<Flashcard(id={self.id}, question='{self.question[:50]}...')>"
+"""Quiz-related models"""
+from .base import Base, Column, Integer, String, Text, DateTime, Float, Boolean, ForeignKey, JSON, func, relationship
 
 class Quiz(Base):
     """Quiz model for storing quiz information"""
@@ -145,20 +84,3 @@ class QuizAnswer(Base):
 
     def __repr__(self):
         return f"<QuizAnswer(id={self.id}, is_correct={self.is_correct})>"
-
-class YouTubeCard(Base):
-    """YouTube card model for storing extracted video information"""
-    __tablename__ = "youtube_cards"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(200), nullable=False)
-    url = Column(String(500), nullable=False, unique=True)
-    description = Column(Text, nullable=True)
-    transcript = Column(Text, nullable=True)
-    duration = Column(Integer, nullable=True)  # Duration in seconds
-    channel = Column(String(100), nullable=True)
-    extracted_at = Column(DateTime(timezone=True), server_default=func.now())
-    flashcard_count = Column(Integer, default=0)
-
-    def __repr__(self):
-        return f"<YouTubeCard(id={self.id}, title='{self.title}')>" 

@@ -3,11 +3,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
-from backend.app.core.database import get_db
-from backend.app.api.deps import get_current_user
-from backend.app.db.models import User, Flashcard
-from backend.app.schemas.flashcard import FlashcardCreate, FlashcardUpdate, FlashcardResponse
-from backend.app.services.flashcard_service import FlashcardService
+from app.core.database import get_db
+from app.api.deps import get_current_user
+from app.models import User, Flashcard
+from app.schemas.flashcard import FlashcardCreate, FlashcardUpdate, FlashcardResponse
+from app.services.flashcard_service import FlashcardService
 
 router = APIRouter()
 

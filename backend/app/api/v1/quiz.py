@@ -3,14 +3,14 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
-from backend.app.core.database import get_db
-from backend.app.api.deps import get_current_user
-from backend.app.db.models import User, Quiz, QuizAttempt
-from backend.app.schemas.quiz import (
+from app.core.database import get_db
+from app.api.deps import get_current_user
+from app.models import User, Quiz, QuizAttempt
+from app.schemas.quiz import (
     QuizCreate, QuizResponse, QuizAttemptCreate, QuizAttemptResponse, 
     QuizAnswerCreate, QuizAnswerResponse, QuizQuestionResponse
 )
-from backend.app.services.quiz_service import QuizService
+from app.services.quiz_service import QuizService
 
 router = APIRouter()
 

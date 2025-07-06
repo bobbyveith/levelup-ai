@@ -3,8 +3,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
-from backend.app.db.models import Flashcard, User, Category
-from backend.app.schemas.flashcard import FlashcardCreate, FlashcardUpdate
+from app.models import Flashcard, User, Category
+from app.schemas.flashcard import FlashcardCreate, FlashcardUpdate
 
 class FlashcardService:
     """Service class for flashcard operations using SQLAlchemy"""

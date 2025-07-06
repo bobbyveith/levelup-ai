@@ -46,7 +46,7 @@ def get_db() -> Generator[Session, None, None]:
 def create_tables():
     """Create all database tables"""
     # Import models to register them with Base
-    from app.db import models
+    from app import models
     Base.metadata.create_all(bind=engine)
 
 def drop_tables():

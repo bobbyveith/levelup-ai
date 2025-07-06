@@ -3,11 +3,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
-from backend.app.core.database import get_db
-from backend.app.api.deps import get_current_user
-from backend.app.db.models import User, YouTubeCard
-from backend.app.schemas.youtube import YouTubeCardCreate, YouTubeCardUpdate, YouTubeCardResponse
-from backend.app.services.youtube_service import YouTubeService
+from app.core.database import get_db
+from app.api.deps import get_current_user
+from app.models import User, YouTubeCard
+from app.schemas.youtube import YouTubeCardCreate, YouTubeCardUpdate, YouTubeCardResponse
+from app.services.youtube_service import YouTubeService
 
 router = APIRouter()
 

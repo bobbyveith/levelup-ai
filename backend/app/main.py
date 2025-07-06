@@ -6,9 +6,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 
-from backend.app.core.config import settings
-from backend.app.core.database import init_db
-from backend.app.api.v1 import flashcards, quiz, youtube
+from app.core.config import settings
+from app.core.database import init_db
+from app.api.v1 import flashcards, quiz, youtube
 
 # Initialize database tables
 init_db()

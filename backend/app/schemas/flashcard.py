@@ -5,10 +5,10 @@ from datetime import datetime
 
 class FlashcardBase(BaseModel):
     """Base flashcard schema"""
-    question: str = Field(..., min_length=1, max_length=1000, description="The question text")
-    answer: str = Field(..., min_length=1, max_length=1000, description="The answer text")
-    category: Optional[str] = Field(None, max_length=100, description="Category of the flashcard")
-    difficulty: Optional[str] = Field(None, regex="^(easy|medium|hard)$", description="Difficulty level")
+    question: str = Field(..., min_length=1, max_length=1000, description="Question text")
+    answer: str = Field(..., min_length=1, max_length=1000, description="Answer text")
+    category: Optional[str] = Field(None, max_length=100, description="Category name")
+    difficulty: Optional[str] = Field(None, pattern="^(easy|medium|hard)$", description="Difficulty level")
     tags: Optional[List[str]] = Field(default_factory=list, description="List of tags")
 
 class FlashcardCreate(FlashcardBase):
@@ -20,14 +20,16 @@ class FlashcardUpdate(BaseModel):
     question: Optional[str] = Field(None, min_length=1, max_length=1000)
     answer: Optional[str] = Field(None, min_length=1, max_length=1000)
     category: Optional[str] = Field(None, max_length=100)
-    difficulty: Optional[str] = Field(None, regex="^(easy|medium|hard)$")
+    difficulty: Optional[str] = Field(None, pattern="^(easy|medium|hard)$")
     tags: Optional[List[str]] = None
 
 class FlashcardResponse(FlashcardBase):
     """Schema for flashcard response"""
-    id: str
-    created_at: Optional[datetime] = None
+    id: int
+    created_at: datetime
     updated_at: Optional[datetime] = None
+    owner_id: Optional[int] = None
+    category_id: Optional[int] = None
     
     class Config:
         from_attributes = True

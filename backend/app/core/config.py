@@ -1,6 +1,6 @@
 """Configuration settings for LevelUp AI"""
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
 import os
 
 class Settings(BaseSettings):
@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     
     # Database settings
     database_url: str = "sqlite:///./data/levelup.db"
+    
+    # AI API Keys (optional) - matching environment variable names
+    OPENAI_API_KEY: Optional[str] = None
+    YOUTUBE_API_KEY: Optional[str] = None
     
     class Config:
         case_sensitive = True

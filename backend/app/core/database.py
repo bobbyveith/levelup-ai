@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 from typing import Generator
 import os
 
-from app.core.config import settings
+from backend.app.core.config import settings
 
 # Ensure data directory exists
 os.makedirs(settings.data_dir, exist_ok=True)
@@ -46,7 +46,7 @@ def get_db() -> Generator[Session, None, None]:
 def create_tables():
     """Create all database tables"""
     # Import models to register them with Base
-    from app import models
+    from backend.app import models
     Base.metadata.create_all(bind=engine)
 
 def drop_tables():

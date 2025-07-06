@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime
 
-from app.models import Quiz, QuizQuestion, QuizAttempt, QuizAnswer, Flashcard, User
-from app.schemas.quiz import QuizCreate, QuizAttemptCreate, QuizAnswerCreate
+from backend.app.models import Quiz, QuizQuestion, QuizAttempt, QuizAnswer, Flashcard, User
+from backend.app.schemas.quiz import QuizCreate, QuizAttemptCreate, QuizAnswerCreate
 
 class QuizService:
     """Service class for quiz operations using SQLAlchemy"""

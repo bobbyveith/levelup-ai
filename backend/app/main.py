@@ -6,9 +6,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 
-from app.core.config import settings
-from app.core.database import init_db
-from app.api.v1 import flashcards, quiz, youtube
+from backend.app.core.config import settings
+from backend.app.core.database import init_db
+from backend.app.api.v1 import flashcards, quiz, youtube
 
 # Initialize database tables
 init_db()
@@ -33,10 +33,10 @@ app.add_middleware(
 )
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 # Jinja2 templates
-templates = Jinja2Templates(directory="../frontend/templates")
+templates = Jinja2Templates(directory="frontend/templates")
 
 # Include API routers
 app.include_router(flashcards.router, prefix="/api/v1/flashcards", tags=["flashcards"])

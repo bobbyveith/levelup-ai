@@ -3,8 +3,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from app.models import YouTubeCard
-from app.schemas.youtube import YouTubeCardCreate, YouTubeCardUpdate
+from backend.app.models import YouTubeCard
+from backend.app.schemas.youtube import YouTubeCardCreate, YouTubeCardUpdate
 
 class YouTubeService:
     """Service class for YouTube operations using SQLAlchemy"""

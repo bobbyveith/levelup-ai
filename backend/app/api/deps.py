@@ -1,8 +1,8 @@
 """API dependencies and shared logic"""
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.models import User
+from backend.app.core.database import get_db
+from backend.app.models import User
 
 def get_database() -> Session:
     """Get database session dependency"""
